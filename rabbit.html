@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彼得兔的花園蔬果冒險</title>
+    <style>
+        /* 全局樣式與導覽列 */
+        :root {
+            --primary-color: #5c8d89;
+            --secondary-color: #74b49b;
+            --accent-color: #f4f9f4;
+            --text-color: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, "Microsoft JhengHei";
+            margin: 0;
+            padding: 0;
+            background-color: var(--accent-color);
+            color: var(--text-color);
+        }
+
+        nav {
+            background-color: var(--primary-color);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        nav button {
+            background-color: white;
+            border: 2px solid var(--secondary-color);
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover, nav button.active {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* 頁面切換控制 */
+        .page {
+            display: none;
+            padding: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        /* 頁面 1：遊戲區樣式 */
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-board {
+            display: flex;
+            justify-content: space-between;
+            width: 600px;
+            font-size: 20px;
+            font-weight: bold;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* 遊戲舞台：使用格子背景 */
+        #game-stage {
+            width: 600px;
+            height: 400px;
+            position: relative;
+            background-color: #e2f0d9;
+            /* 建立方格背景效果 (每格 40x40 px) */
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            border: 4px solid var(--primary-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* 角色與物品 (以 Emoji 代替圖片，方便單檔執行) */
+        .game-element {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            font-size: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.1s linear;
+        }
+
+        #peter-rabbit {
+            z-index: 10;
+        }
+
+        .controls-tip {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            background: #eee;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        /* 頁面 2：知識教學樣式 */
+        .knowledge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            border-top: 5px solid var(--secondary-color);
+        }
+
+        .card .icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        /* 頁面 3：實驗室（分類）樣式 */
+        .lab-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+
+        .drag-zone {
+            display: flex;
+            gap: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 80px;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .drop-basket {
+            width: 200px;
+            min-height: 200px;
+            background: #f0f0f0;
+            border: 3px dashed var(--primary-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .drop-basket.hover {
+            background: #e2f0d9;
+        }
+
+        .draggable-item {
+            font-size: 36px;
+            cursor: grab;
+            background: #fff;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 頁面 4：評量測驗樣式 */
+        .quiz-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: var(--accent-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-action {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto 0;
+        }
+
+        .btn-action:hover {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <button onclick="switchPage('game')" id="nav-game" class="active">🐰 遊戲：彼得冒險</button>
+        <button onclick="switchPage('knowledge')" id="nav-knowledge">📚 蔬果知識普及</button>
+        <button onclick="switchPage('lab')" id="nav-lab">🔬 蔬果分類實驗</button>
+        <button onclick="switchPage('quiz')" id="nav-quiz">📝 課後評量測驗</button>
+    </nav>
+
+    <div id="page-game" class="page active">
+        <h1>🐰 彼得兔的花園蔬果大冒險 🥕</h1>
+        <p style="text-align:center;">每位同學有 1 分鐘的時間，移動（彼得）來收集蔬菜，比賽看誰得分最高！</p>
+        
+        <div id="game-container">
+            <div class="status-board">
+                <div>得分：<span id="score-display">0</span> 分</div>
+                <div>剩餘時間：<span id="timer-display">60</span> 秒</div>
+            </div>
+
+            <div id="game-stage">
+                <div id="peter-rabbit" class="game-element">🐰</div>
+                </div>
+
+            <div class="controls-tip">
+                <strong>🎮 遊戲操作說明：</strong><br>
+                1. 使用鍵盤【上下左右鍵】控制兔子在方格中移動。<br>
+                2. 當走到蔬菜旁邊時，按下【空白鍵】，兔子就會伸手撿起蔬菜並加 1 分！<br>
+                3. 畫面永遠保持 3 個蔬菜，撿完會自動長出新的唷！
+            </div>
+            
+            <button class="btn-action" onclick="startGame()">開始/重新挑戰（1分鐘）</button>
+        </div>
+    </div>
+
+    <div id="page-knowledge" class="page">
+        <h1>📚 認識我們的蔬菜與水果</h1>
+        <p style="text-align:center; font-size:18px;">植物的各個部位都可以變成我們餐桌上的美味佳餚喔！</p>
+        
+        <div class="knowledge-grid">
+            <div class="card">
+                <div class="icon">🥕</div>
+                <h3>根部蔬菜</h3>
+                <p>像是胡蘿蔔、白蘿蔔。它們把營養儲存在地底下的根部，含有豐富的纖維素喔！</p>
+            </div>
+            <div class="card">
+                <div class="icon">🥬</div>
+                <h3>葉菜類</h3>
+                <p>像是青江菜、高麗菜。多吃綠色葉菜可以幫助腸胃蠕動，讓身體更健康。</p>
+            </div>
+            <div class="card">
+                <div class="icon">🍎</div>
+                <h3>果實類</h3>
+                <p>像是蘋果、番茄。植物開花授粉後結出的果實，通常含有種子與甜美的果肉。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-lab" class="page">
+        <h1>🔬 蔬果分類實驗室</h1>
+        <p style="text-align:center;">請用滑鼠把下方的食物「拖曳」到正確的籃子裡吧！</p>
+        
+        <div class="drag-zone" id="drag-zone">
+            <div class="draggable-item" draggable="true" id="item-carrot" data-type="vegetable">🥕</div>
+            <div class="draggable-item" draggable="true" id="item-apple" data-type="fruit">🍎</div>
+            <div class="draggable-item" draggable="true" id="item-cabbage" data-type="vegetable">🥬</div>
+            <div class="draggable-item" draggable="true" id="item-banana" data-type="fruit">🍌</div>
+            <div class="draggable-item" draggable="true" id="item-broccoli" data-type="vegetable">🥦</div>
+            <div class="draggable-item" draggable="true" id="item-grape" data-type="fruit">🍇</div>
+        </div>
+
+        <div class="lab-container">
+            <div class="drop-basket" id="basket-vegetable" data-accept="vegetable">
+                <h3>🥦 蔬菜籃</h3>
+                <div class="basket-content"></div>
+            </div>
+            <div class="drop-basket" id="basket-fruit" data-accept="fruit">
+                <h3>🍎 水果籃</h3>
+                <div class="basket-content"></div>
+            </div>
+        </div>
+        <p id="lab-feedback" style="text-align:center; font-weight:bold; color:var(--primary-color); margin-top:20px;"></p>
+    </div>
+
+    <div id="page-quiz" class="page">
+        <h1>📝 蔬果小達人挑戰賽</h1>
+        
+        <div class="quiz-container">
+            <div id="quiz-box">
+                <h3 id="quiz-question">問題加載中...</h3>
+                <button class="quiz-option" onclick="checkAnswer(0)" id="opt0">選項 1</button>
+                <button class="quiz-option" onclick="checkAnswer(1)" id="opt1">選項 2</button>
+                <button class="quiz-option" onclick="checkAnswer(2)" id="opt2">選項 3</button>
+            </div>
+            <div id="quiz-result" style="display:none; text-align:center;">
+                <h3 id="quiz-score-text"></h3>
+                <button class="btn-action" onclick="resetQuiz()">再試一次</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 核心功能：單頁式分頁切換 ---
+        function switchPage(pageId) {
+            // 隱藏所有頁面
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            // 取消導覽列按鈕的 active 狀態
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            
+            // 顯示指定頁面
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            // 高亮對應按鈕
+            document.getElementById(`nav-${pageId}`).classList.add('active');
+        }
+
+        // ================= 頁面 1：遊戲邏輯變數 =================
+        const stage = document.getElementById('game-stage');
+        const peter = document.getElementById('peter-rabbit');
+        const scoreDisplay = document.getElementById('score-display');
+        const timerDisplay = document.getElementById('timer-display');
+
+        // 地圖格子參數（網頁寬600x高400，每格40x40）
+        const gridX = 40;
+        const gridY = 40;
+        const stageWidth = 600;
+        const stageHeight = 400;
+
+        // 兔子的初始坐標格 (280, 200)
+        let peterX = 280;
+        let peterY = 200;
+
+        let score = 0;
+        let timeLeft = 60;
+        let gameTimer = null;
+        let isGameRunning = false;
+
+        // 儲存目前地圖上的 3 個蔬果資料
+        let itemsOnStage = [];
+        const vegetableEmojis = ['🥕', '🥬', '🥦', '🌽', '🍅'];
+
+        // 初始化兔子位置
+        function updatePeterPosition() {
+            peter.style.left = peterX + 'px';
+            peter.style.top = peterY + 'px';
+        }
+        updatePeterPosition();
+
+        // 開始遊戲與倒數計時
+        function startGame() {
+            // 重置狀態
+            score = 0;
+            timeLeft = 60;
+            isGameRunning = true;
+            scoreDisplay.innerText = score;
+            timerDisplay.innerText = timeLeft;
+            
+            // 清除之前的蔬果與計時器
+            document.querySelectorAll('.veggie-item').forEach(el => el.remove());
+            itemsOnStage = [];
+            clearInterval(gameTimer);
+
+            // 產生 3 個新蔬菜
+            for (let i = 0; i < 3; i++) {
+                spawnVegetable();
+            }
+
+            // 啟動倒數計時器
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    isGameRunning = false;
+                    alert(`⏱️ 時間到！恭喜你完成了挑戰！\n你的最終得分是：${score} 分！\n快去登記分數和同學比賽吧！`);
+                }
+            }, 1000);
+        }
+
+        // 在隨機網格點生成蔬菜
+        function spawnVegetable() {
+            const veggie = document.createElement('div');
+            veggie.className = 'game-element veggie-item';
+            
+            // 隨機計算方格點 (必須是 40 的倍數)
+            const maxGridX = (stageWidth / gridX) - 1;
+            const maxGridY = (stageHeight / gridY) - 1;
+            const x = Math.floor(Math.random() * maxGridX) * gridX;
+            const y = Math.floor(Math.random() * maxGridY) * gridY;
+            
+            // 隨機選一個蔬菜圖案
+            const randomEmoji = vegetableEmojis[Math.floor(Math.random() * vegetableEmojis.length)];
+            veggie.innerText = randomEmoji;
+            
+            veggie.style.left = x + 'px';
+            veggie.style.top = y + 'px';
+            
+            stage.appendChild(veggie);
+            
+            // 記錄座標供後續判定
+            itemsOnStage.push({
+                element: veggie,
+                x: x,
+                y: y
+            });
+        }
+
+        // 鍵盤事件監聽：操控移動與採摘
+        window.addEventListener('keydown', function(e) {
+            // 如果沒點擊開始，或遊戲已結束，不執行動作
+            if (!isGameRunning) return;
+
+            // 防止網頁因上下鍵或空白鍵捲動
+            if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+                e.preventDefault();
+            }
+
+            // 1. 上下左右鍵移動機制
+            switch(e.code) {
+                case 'ArrowUp':
+                    if (peterY > 0) peterY -= gridY;
+                    break;
+                case 'ArrowDown':
+                    if (peterY < stageHeight - gridY) peterY += gridY;
+                    break;
+                case 'ArrowLeft':
+                    if (peterX > 0) peterX -= gridX;
+                    break;
+                case 'ArrowRight':
+                    if (peterX < stageWidth - gridX) peterX += gridX;
+                    break;
+                
+                // 2. 空白鍵採摘機制
+                case 'Space':
+                    pickUpVegetable();
+                    break;
+            }
+            updatePeterPosition();
+        });
+
+        // 撿蔬菜判斷：檢查兔子周圍（包含正上方/鄰近格）是否有蔬菜
+        function pickUpVegetable() {
+            // 模擬採摘動作：稍微將兔子放大一下
+            peter.style.transform = 'scale(1.3)';
+            setTimeout(() => { peter.style.transform = 'scale(1)'; }, 150);
+
+            // 尋找與兔子位置重疊或在鄰近方格的蔬菜
+            let pickedIndex = -1;
+            for (let i = 0; i < itemsOnStage.length; i++) {
+                let item = itemsOnStage[i];
+                // 判定條件：兔子和蔬菜距離在一格(40px)以內
+                let distanceX = Math.abs(peterX - item.x);
+                let distanceY = Math.abs(peterY - item.y);
+                
+                if (distanceX <= gridX && distanceY <= gridY) {
+                    pickedIndex = i;
+                    break;
+                }
+            }
+
+            // 如果成功採摘
+            if (pickedIndex !== -1) {
+                // 移除畫面的蔬菜
+                itemsOnStage[pickedIndex].element.remove();
+                // 從陣列中移除
+                itemsOnStage.splice(pickedIndex, 1);
+                
+                // 加分並更新
+                score++;
+                scoreDisplay.innerText = score;
+                
+                // 自動生成新蔬菜，使遊戲可以循環進行
+                spawnVegetable();
+            }
+        }
+
+        // ================= 頁面 3：實驗室拖曳邏輯 =================
+        let draggedItem = null;
+
+        document.querySelectorAll('.draggable-item').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedItem = e.target;
+            });
+        });
+
+        document.querySelectorAll('.drop-basket').forEach(basket => {
+            basket.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('hover');
+            });
+
+            basket.addEventListener('dragleave', function() {
+                this.classList.remove('hover');
+            });
+
+            basket.addEventListener('drop', function(e) {
+                this.classList.remove('hover');
+                const itemType = draggedItem.getAttribute('data-type');
+                const basketType = this.getAttribute('data-accept');
+                const feedback = document.getElementById('lab-feedback');
+
+                if (itemType === basketType) {
+                    this.querySelector('.basket-content').appendChild(draggedItem);
+                    feedback.innerText = "🌟 太棒了！分類正確！";
+                    feedback.style.color = "green";
+                } else {
+                    feedback.innerText = "❌ 哎呀，再想想看，它好像不屬於這個籃子喔！";
+                    feedback.style.color = "red";
+                }
+            });
+        });
+
+        // ================= 頁面 4：課後評量測驗邏輯 =================
+        const quizData = [
+            { question: "1. 請問胡蘿蔔主要是吃哪一個部位呢？", options: ["葉子", "果實", "根部"], answer: 2 },
+            { question: "2. 為了讓腸胃蠕動更健康，我們可以多吃哪一類蔬菜？", options: ["糖果類", "綠色葉菜類", "油炸類"], answer: 1 },
+            { question: "3. 遊戲中幫忙採收的彼得兔，最喜歡吃園子裡的什麼？", options: ["巧克力", "胡蘿蔔", "漢堡"], answer: 1 }
+        ];
+
+        let currentQuestionIndex = 0;
+        let quizScore = 0;
+
+        function loadQuestion() {
+            if (currentQuestionIndex < quizData.length) {
+                const currentQuiz = quizData[currentQuestionIndex];
+                document.getElementById('quiz-question').innerText = currentQuiz.question;
+                document.getElementById('opt0').innerText = currentQuiz.options[0];
+                document.getElementById('opt1').innerText = currentQuiz.options[1];
+                document.getElementById('opt2').innerText = currentQuiz.options[2];
+            } else {
+                // 顯示結果
+                document.getElementById('quiz-box').style.display = 'none';
+                document.getElementById('quiz-result').style.display = 'block';
+                document.getElementById('quiz-score-text').innerText = `🎉 測試完成！你答對了 ${quizScore} / ${quizData.length} 題！`;
+            }
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (selectedIndex === quizData[currentQuestionIndex].answer) {
+                alert("🎯 答對了！你真棒！");
+                quizScore++;
+            } else {
+                alert("😢 答錯囉，沒關係，再接再厲！");
+            }
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-box').style.display = 'block';
+            document.getElementById('quiz-result').style.display = 'none';
+            loadQuestion();
+        }
+
+        // 初始化載入題目
+        loadQuestion();
+    </script>
+</body>
+</html>
