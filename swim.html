@@ -152,21 +152,21 @@
 </div>
 
 <script>
-    // ⚠️ 請在此處替換您在第一階段部署後獲得的「網頁應用程式網址」
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz_XXXXXXXXXXXXXX/exec';
+    // 已將您的專屬 GAS 網址綁定在此處
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwcXsUfE-rCWIUc3-o3OnWDutFqJxwzp9Nj_Fsu2n7eoDfjC2bAFJKIaQur8LLkIy4/exec';
 
     document.getElementById('quizForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // 防止網頁跳轉
+        e.preventDefault(); // 防止表單預設跳轉
         
         const submitBtn = document.getElementById('submitBtn');
         const messageDiv = document.getElementById('message');
         
-        // 進入傳送狀態，停用按鈕
+        // 進入傳送狀態，鎖定按鈕
         submitBtn.disabled = true;
         submitBtn.innerText = '⏳ 正在傳送資料...';
         messageDiv.style.display = 'none';
 
-        // 收集表單資料
+        // 統整表單資料
         const formData = {
             className: document.getElementById('className').value,
             seatNumber: document.getElementById('seatNumber').value,
@@ -176,22 +176,22 @@
             reflection: document.getElementById('reflection').value
         };
 
-        // 使用 fetch POST 傳送 JSON 資料給 GAS
+        // 使用 fetch 將資料以 POST 送往您的 GAS
         fetch(GAS_URL, {
             method: 'POST',
             body: JSON.stringify(formData),
             headers: {
-                'Content-Type': 'text/plain' // 使用 text/plain 避免跨網域 CORS 預檢失敗
+                'Content-Type': 'text/plain' // 使用 text/plain 避免跨網域預檢限制
             },
-            mode: 'no-cors' // 採用 no-cors 模式確保順利送出
+            mode: 'no-cors' // 採用 no-cors 模式確保不同網域間傳輸通暢
         })
         .then(() => {
-            // 因 no-cors 模式無法讀取回傳內容，直接判定為成功送出
+            // 資料成功送出後的提示與表單部分重設
             messageDiv.className = 'success';
-            messageDiv.innerHTML = `🎉 太棒了！你的學習單已成功送出到【${formData.className}】紀錄中！`;
+            messageDiv.innerHTML = `🎉 太棒了！你的學習單已成功送出到【${formData.className}】分頁中！`;
             messageDiv.style.display = 'block';
             
-            // 回復按鈕狀態並清空表單（保留班級方便下一位或防呆）
+            // 恢復按鈕，並清空個人欄位（保留班級方便下一位學生填寫）
             submitBtn.disabled = false;
             submitBtn.innerText = '🚀 送出學習單';
             document.getElementById('seatNumber').value = '';
@@ -202,7 +202,7 @@
         })
         .catch(error => {
             messageDiv.className = 'error';
-            messageDiv.innerText = '❌ 發生錯誤，請檢查網路連線或聯繫老師！';
+            messageDiv.innerText = '❌ 發生錯誤，請檢查網路連線或通知老師！';
             messageDiv.style.display = 'block';
             submitBtn.disabled = false;
             submitBtn.innerText = '🚀 送出學習單';
