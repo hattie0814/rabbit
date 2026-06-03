@@ -144,8 +144,8 @@
 </div>
 
 <script>
-    // ⚠️ 步驟 2：請將下方單引號內的網址，替換成您部署 GAS 後獲得的「網頁應用程式網址」
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz_XXXXXXXXXXXXXX/exec';
+    // 網址已成功替換為您的專屬 GAS 網頁應用程式網址
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz29M8Mdel2VvTFmlW0_XaMAoYeYGwvwauiuUy7jWmq-Y0iIDkCkUXVYU88hC8sTwg/exec';
 
     document.getElementById('quizForm').addEventListener('submit', function(e) {
         e.preventDefault(); // 阻止表單預設跳頁行為
@@ -183,7 +183,7 @@
                 messageDiv.innerText = '🎉 太棒了！你的學習單已成功送出！';
                 messageDiv.className = 'success';
                 messageDiv.style.display = 'block';
-                document.getElementById('quizForm').reset(); // 清空表單
+                document.getElementById('quizForm').reset(); // 成功後清空表單
             } else {
                 throw new Error(data.message || '儲存失敗');
             }
