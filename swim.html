@@ -152,11 +152,11 @@
 </div>
 
 <script>
-    // 已將您的專屬 GAS 網址綁定在此處
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwcXsUfE-rCWIUc3-o3OnWDutFqJxwzp9Nj_Fsu2n7eoDfjC2bAFJKIaQur8LLkIy4/exec';
+    // 已自動幫您替換為最新生成的有效 GAS 網址
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwTtDaMycG1S3wDDVUhCBC11WxHFiGA33BzUkr8DhtKM8X7eRpmop8-bFxqaZPQEdY/exec';
 
     document.getElementById('quizForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // 防止表單預設跳轉
+        e.preventDefault(); // 防止頁面跳轉
         
         const submitBtn = document.getElementById('submitBtn');
         const messageDiv = document.getElementById('message');
@@ -181,17 +181,17 @@
             method: 'POST',
             body: JSON.stringify(formData),
             headers: {
-                'Content-Type': 'text/plain' // 使用 text/plain 避免跨網域預檢限制
+                'Content-Type': 'text/plain' // 使用 text/plain 繞過跨網域預檢
             },
-            mode: 'no-cors' // 採用 no-cors 模式確保不同網域間傳輸通暢
+            mode: 'no-cors' // 採用 no-cors 模式確保通訊順暢
         })
         .then(() => {
-            // 資料成功送出後的提示與表單部分重設
+            // 資料成功送出後的提示
             messageDiv.className = 'success';
-            messageDiv.innerHTML = `🎉 太棒了！你的學習單已成功送出到【${formData.className}】分頁中！`;
+            messageDiv.innerHTML = `🎉 太棒了！你的學習單已成功送出到【${formData.className}】紀錄中！`;
             messageDiv.style.display = 'block';
             
-            // 恢復按鈕，並清空個人欄位（保留班級方便下一位學生填寫）
+            // 恢復按鈕，並清空個人填寫欄位（保留班級方便下一位學生繼續填寫）
             submitBtn.disabled = false;
             submitBtn.innerText = '🚀 送出學習單';
             document.getElementById('seatNumber').value = '';
